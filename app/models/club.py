@@ -39,4 +39,5 @@ class ClubMembership(Base):
 
     # Relationships
     club: Mapped["Club"] = relationship("Club", back_populates="memberships")
-    user: Mapped["User"] = relationship("User", back_populates="club_memberships")
+    current_book: Mapped[Optional["Book"]] = relationship("Book", back_populates="clubs_reading", lazy="selectin")
+    user: Mapped["User"] = relationship("User", back_populates="club_memberships", lazy="selectin")

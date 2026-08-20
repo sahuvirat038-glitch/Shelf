@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 from app.models.enums import ClubRole
 from app.schemas.book import BookRead
-from app.schemas.user import UserRead
+from app.schemas.user import UserPublic
 
 class ClubBase(BaseModel):
     name: str = Field(..., min_length=2, max_length=255)
@@ -37,6 +37,6 @@ class ClubMembershipRead(BaseModel):
     user_id: int
     role: ClubRole
     joined_at: datetime
-    user: Optional[UserRead] = None
+    user: Optional[UserPublic] = None
 
     model_config = ConfigDict(from_attributes=True)

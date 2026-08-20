@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from app.schemas.user import UserRead
+from app.schemas.user import UserPublic
 
 class CommentBase(BaseModel):
     content: str = Field(..., min_length=1)

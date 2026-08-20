@@ -57,14 +57,26 @@ async def get_or_create_oauth_user(
 
         # Create base username from email or name
         base_username = email.split('@')[0] if email else name.replace(" ", "").lower()
+        username = base_username
+        suffix = 2
+
+        # Loop until we find a unique username
+        while True:
+            uname_query = select(User).where(User.username == username)
+            uname_result = await db.execute(uname_query)
+            if not uname_result.scalar_one_or_none():
+                break
+            username = f"{base_username}{suffix}"
+            suffix += 1
 
         user = User(
             oauth_provider=provider,
             oauth_id=oauth_id,
             email=email,
-            username=base_username,  # Note: In production, you'd add logic to handle duplicate usernames
+            username=username,
             avatar_url=avatar_url
         )
+
         db.add(user)
         await db.commit()
         await db.refresh(user)

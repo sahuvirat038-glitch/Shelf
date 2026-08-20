@@ -17,5 +17,5 @@ class Comment(Base):
 
     # Relationships
     club: Mapped["Club"] = relationship("Club", back_populates="comments")
-    user: Mapped["User"] = relationship("User", back_populates="comments")
+    user: Mapped["User"] = relationship("User", back_populates="comments", lazy="selectin")
     book: Mapped[Optional["Book"]] = relationship("Book")

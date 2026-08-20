@@ -24,4 +24,4 @@ class ReadingEntry(Base):
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="reading_entries")
-    book: Mapped["Book"] = relationship("Book", back_populates="reading_entries")
+    book: Mapped["Book"] = relationship("Book", back_populates="reading_entries", lazy="selectin")

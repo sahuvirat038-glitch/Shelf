@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from app.schemas.user import UserRead
+from app.schemas.user import UserPublic
 
 class ReviewBase(BaseModel):
     rating: int = Field(..., ge=1, le=5)

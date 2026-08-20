@@ -7,7 +7,7 @@ from app.db.session import get_db
 from app.api.deps import get_current_user
 from app.models.user import User
 from app.models.reading_entry import ReadingEntry
-from app.schemas.user import UserRead, UserUpdate
+from app.schemas.user import UserRead, UserUpdate, UserPublic
 from app.schemas.reading_entry import ReadingEntryRead
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -35,7 +35,7 @@ async def update_my_profile(
     return current_user
 
 
-@router.get("/{user_id}", response_model=UserRead)
+@router.get("/{user_id}", response_model=UserPublic)
 async def get_user_profile(user_id: int, db: AsyncSession = Depends(get_db)):
     """Get a public user profile."""
     user = await db.get(User, user_id)

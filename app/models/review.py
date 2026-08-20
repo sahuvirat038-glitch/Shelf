@@ -18,5 +18,6 @@ class Review(Base):
     )
 
     # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="reviews")
+    user: Mapped["User"] = relationship("User", back_populates="reviews", lazy="selectin")
+
     book: Mapped["Book"] = relationship("Book", back_populates="reviews")

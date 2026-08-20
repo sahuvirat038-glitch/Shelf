@@ -12,9 +12,11 @@ class UserUpdate(BaseModel):
     bio: Optional[str] = None
     avatar_url: Optional[str] = None
 
-class UserRead(UserBase):
+class UserPublic(UserBase):
     id: int
-    email: EmailStr
     created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
 
+class UserRead(UserPublic):
+    email: EmailStr
     model_config = ConfigDict(from_attributes=True)
