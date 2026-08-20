@@ -1,21 +1,24 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 from app.schemas.user import UserPublic
 
+
 class CommentBase(BaseModel):
-    content: str = Field(..., min_length=1)
+    book_id: Optional[int] = None
+    content: str
     is_spoiler: bool = False
 
+
 class CommentCreate(CommentBase):
-    book_id: Optional[int] = None
+    pass
+
 
 class CommentRead(CommentBase):
     id: int
     club_id: int
     user_id: int
-    book_id: Optional[int] = None
     created_at: datetime
-    user: Optional[UserRead] = None
+    user: Optional[UserPublic] = None
 
     model_config = ConfigDict(from_attributes=True)

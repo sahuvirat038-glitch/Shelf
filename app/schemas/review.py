@@ -4,21 +4,23 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.schemas.user import UserPublic
 
 class ReviewBase(BaseModel):
+    book_id: int
     rating: int = Field(..., ge=1, le=5)
-    body: str = Field(..., min_length=1)
+    content: str
 
 class ReviewCreate(ReviewBase):
-    book_id: int
+    pass
+
 
 class ReviewUpdate(BaseModel):
     rating: Optional[int] = Field(None, ge=1, le=5)
-    body: Optional[str] = Field(None, min_length=1)
+    content: Optional[str] = None
 
 class ReviewRead(ReviewBase):
     id: int
     user_id: int
-    book_id: int
     created_at: datetime
-    user: Optional[UserRead] = None
+    updated_at: datetime
+    user: Optional[UserPublic] = None
 
     model_config = ConfigDict(from_attributes=True)
