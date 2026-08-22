@@ -19,7 +19,7 @@ class Club(Base):
 
     # Relationships
     owner: Mapped["User"] = relationship("User", back_populates="clubs_owned", foreign_keys=[owner_id])
-    current_book: Mapped[Optional["Book"]] = relationship("Book", back_populates="clubs_reading")
+    current_book: Mapped[Optional["Book"]] = relationship("Book", back_populates="clubs_reading", lazy="selectin")
     memberships: Mapped[List["ClubMembership"]] = relationship("ClubMembership", back_populates="club", cascade="all, delete-orphan")
     comments: Mapped[List["Comment"]] = relationship("Comment", back_populates="club", cascade="all, delete-orphan")
 
@@ -39,5 +39,4 @@ class ClubMembership(Base):
 
     # Relationships
     club: Mapped["Club"] = relationship("Club", back_populates="memberships")
-    current_book: Mapped[Optional["Book"]] = relationship("Book", back_populates="clubs_reading", lazy="selectin")
     user: Mapped["User"] = relationship("User", back_populates="club_memberships", lazy="selectin")
