@@ -9,9 +9,10 @@ class Review(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     book_id: Mapped[int] = mapped_column(ForeignKey("books.id", ondelete="CASCADE"), nullable=False)
-    rating: Mapped[int] = mapped_column(Integer, nullable=False)  # 1–5
-    body: Mapped[str] = mapped_column(Text, nullable=False)
+    rating: Mapped[int] = mapped_column(Integer, nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)  # renamed from body
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)  # new
 
     __table_args__ = (
         UniqueConstraint("user_id", "book_id", name="uq_user_book_review"),
@@ -19,5 +20,4 @@ class Review(Base):
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="reviews", lazy="selectin")
-
     book: Mapped["Book"] = relationship("Book", back_populates="reviews")
