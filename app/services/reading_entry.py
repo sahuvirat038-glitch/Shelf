@@ -5,13 +5,14 @@ from fastapi import HTTPException, status
 from app.models.reading_entry import ReadingEntry
 from app.models.enums import ReadingStatus
 from app.schemas.reading_entry import ReadingEntryCreate, ReadingEntryUpdate
+import uuid
 
 
 def utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-async def add_book_to_shelf(db: AsyncSession, user_id: int, entry_in: ReadingEntryCreate) -> ReadingEntry:
+async def add_book_to_shelf(db: AsyncSession, user_id: uuid.UUID, entry_in: ReadingEntryCreate) -> ReadingEntry:
     # Check if entry already exists
     query = select(ReadingEntry).where(
         ReadingEntry.user_id == user_id,

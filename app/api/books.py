@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
@@ -7,25 +8,24 @@ from app.db.session import get_db
 from app.api.deps import get_current_user
 from app.models.user import User
 from app.models.book import Book
-from app.schemas.book import BookRead, BookCreate
-from app.services.book import get_or_create_book
 from app.models.review import Review
+from app.schemas.book import BookCreate, BookRead, BookUpdate
+from app.services.book import create_book
 
 router = APIRouter(prefix="/books", tags=["books"])
 
+
 @router.post("", response_model=BookRead)
 async def add_book(
-    book_in: BookCreate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+        book_in: BookCreate,
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-    """Add a new book to the shared catalog (avoids duplicates)."""
-    return await get_or_create_book(db, book_in, current_user.id)
+    return await create_book(db, current_user.id, book_in)
 
 
 @router.get("", response_model=List[BookRead])
 async def list_books(skip: int = 0, limit: int = 50, db: AsyncSession = Depends(get_db)):
-    """Browse the shared book catalog with stats."""
     query = (
         select(Book, func.coalesce(func.avg(Review.rating), 0.0), func.count(Review.id))
         .outerjoin(Review, Review.book_id == Book.id)
@@ -43,8 +43,7 @@ async def list_books(skip: int = 0, limit: int = 50, db: AsyncSession = Depends(
 
 
 @router.get("/{book_id}", response_model=BookRead)
-async def get_book(book_id: int, db: AsyncSession = Depends(get_db)):
-    """Get details of a specific book with stats."""
+async def get_book(book_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     query = (
         select(Book, func.coalesce(func.avg(Review.rating), 0.0), func.count(Review.id))
         .outerjoin(Review, Review.book_id == Book.id)

@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import uuid
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import List
@@ -8,18 +9,17 @@ from app.api.deps import get_current_user
 from app.models.user import User
 from app.models.club import Club, ClubMembership
 from app.schemas.club import ClubCreate, ClubRead, ClubUpdate, ClubMembershipRead
-from app.services.club import create_club, join_club
-from app.models.club import ClubMembership
+from app.services.club import create_club
 
 router = APIRouter(prefix="/clubs", tags=["clubs"])
 
+
 @router.post("", response_model=ClubRead)
-async def start_new_club(
-    club_in: ClubCreate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+async def create_new_club(
+        club_in: ClubCreate,
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user)
 ):
-    """Create a new book club (you become the owner)."""
     return await create_club(db, current_user.id, club_in)
 
 
@@ -42,7 +42,7 @@ async def list_public_clubs(skip: int = 0, limit: int = 50, db: AsyncSession = D
 
 
 @router.get("/{club_id}", response_model=ClubRead)
-async def get_club_details(club_id: int, db: AsyncSession = Depends(get_db)):
+async def get_club_details(club_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     query = (
         select(Club, func.count(ClubMembership.id))
         .outerjoin(ClubMembership, ClubMembership.club_id == Club.id)
@@ -59,11 +59,22 @@ async def get_club_details(club_id: int, db: AsyncSession = Depends(get_db)):
     club.member_count = count
     return club
 
+
 @router.post("/{club_id}/join", response_model=ClubMembershipRead)
-async def join_existing_club(
-    club_id: int,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """Join a public book club."""
-    return await join_club(db, current_user.id, club_id)
+async def join_club(club_id: uuid.UUID, db: AsyncSession = Depends(get_db),
+                    current_user: User = Depends(get_current_user)):
+    club = await db.get(Club, club_id)
+    if not club or not club.is_public:
+        raise HTTPException(status_code=404, detail="Public club not found")
+
+    mem_query = select(ClubMembership).where(ClubMembership.club_id == club_id,
+                                             ClubMembership.user_id == current_user.id)
+    mem_result = await db.execute(mem_query)
+    if mem_result.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="Already a member")
+
+    membership = ClubMembership(club_id=club_id, user_id=current_user.id)
+    db.add(membership)
+    await db.commit()
+    await db.refresh(membership)
+    return membership

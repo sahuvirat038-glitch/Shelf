@@ -3,6 +3,7 @@ from sqlalchemy import select
 from fastapi import HTTPException
 from app.models.review import Review
 from app.schemas.review import ReviewCreate
+import uuid
 
 
 async def create_review(db: AsyncSession, user_id: int, review_in: ReviewCreate) -> Review:
@@ -19,7 +20,7 @@ async def create_review(db: AsyncSession, user_id: int, review_in: ReviewCreate)
         user_id=user_id,
         book_id=review_in.book_id,
         rating=review_in.rating,
-        body=review_in.content
+        content=review_in.content
     )
 
     db.add(new_review)

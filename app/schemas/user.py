@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
@@ -13,7 +14,7 @@ class UserUpdate(BaseModel):
     avatar_url: Optional[str] = None
 
 class UserPublic(UserBase):
-    id: int
+    id: uuid.UUID
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 

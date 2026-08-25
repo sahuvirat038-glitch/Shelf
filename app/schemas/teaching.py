@@ -1,23 +1,26 @@
+import uuid
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
+from app.schemas.user import UserPublic
 
 class TeachingBase(BaseModel):
-    content: str = Field(..., min_length=1)
+    book_id: uuid.UUID
+    content: str
     is_public: bool = True
 
 class TeachingCreate(TeachingBase):
-    book_id: int
+    pass
 
 class TeachingUpdate(BaseModel):
-    content: Optional[str] = Field(None, min_length=1)
+    content: Optional[str] = None
     is_public: Optional[bool] = None
 
 class TeachingRead(TeachingBase):
-    id: int
-    user_id: int
-    book_id: int
+    id: uuid.UUID
+    user_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
+    user: Optional[UserPublic] = None
 
     model_config = ConfigDict(from_attributes=True)

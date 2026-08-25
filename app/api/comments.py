@@ -1,7 +1,8 @@
+import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from typing import List
+from typing import List, Optional
 from app.db.session import get_db
 from app.api.deps import get_current_user
 from app.models.user import User
@@ -14,8 +15,8 @@ router = APIRouter(prefix="/clubs", tags=["comments"])
 
 
 @router.get("/{club_id}/comments", response_model=List[CommentRead])
-async def get_club_comments(club_id: int, book_id: int = None, db: AsyncSession = Depends(get_db)):
-    """Get comments for a club, optionally filtered by book."""
+async def get_club_comments(club_id: uuid.UUID, book_id: Optional[uuid.UUID] = None,
+                            db: AsyncSession = Depends(get_db)):
     query = select(Comment).where(Comment.club_id == club_id)
     if book_id:
         query = query.where(Comment.book_id == book_id)
@@ -25,13 +26,11 @@ async def get_club_comments(club_id: int, book_id: int = None, db: AsyncSession 
 
 @router.post("/{club_id}/comments", response_model=CommentRead)
 async def post_club_comment(
-        club_id: int,
+        club_id: uuid.UUID,
         comment_in: CommentCreate,
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Post a comment in a club. Must be a member."""
-    # Check membership
     mem_query = select(ClubMembership).where(ClubMembership.club_id == club_id,
                                              ClubMembership.user_id == current_user.id)
     mem_result = await db.execute(mem_query)
@@ -42,14 +41,12 @@ async def post_club_comment(
 
 
 @router.delete("/comments/{comment_id}", status_code=204)
-async def delete_club_comment(comment_id: int, db: AsyncSession = Depends(get_db),
+async def delete_club_comment(comment_id: uuid.UUID, db: AsyncSession = Depends(get_db),
                               current_user: User = Depends(get_current_user)):
-    """Delete a comment (must be author or club owner)."""
     comment = await db.get(Comment, comment_id)
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
 
-    # If not author, check if club owner
     if comment.user_id != current_user.id:
         owner_query = select(ClubMembership).where(
             ClubMembership.club_id == comment.club_id,

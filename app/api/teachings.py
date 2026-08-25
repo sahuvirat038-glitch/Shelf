@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -18,13 +19,11 @@ async def post_teaching(
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Write a key takeaway/teaching for a book."""
     return await create_teaching(db, current_user.id, teaching_in)
 
 
 @router.get("/me", response_model=List[TeachingRead])
 async def my_teachings(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """Get all your own teachings."""
     query = select(Teaching).where(Teaching.user_id == current_user.id)
     result = await db.execute(query)
     return result.scalars().all()
@@ -32,12 +31,11 @@ async def my_teachings(db: AsyncSession = Depends(get_db), current_user: User = 
 
 @router.patch("/{teaching_id}", response_model=TeachingRead)
 async def edit_teaching(
-        teaching_id: int,
+        teaching_id: uuid.UUID,
         update_data: TeachingUpdate,
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
-    """Update a teaching."""
     teaching = await db.get(Teaching, teaching_id)
     if not teaching or teaching.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Teaching not found")
@@ -45,9 +43,8 @@ async def edit_teaching(
 
 
 @router.delete("/{teaching_id}", status_code=204)
-async def delete_teaching(teaching_id: int, db: AsyncSession = Depends(get_db),
+async def delete_teaching(teaching_id: uuid.UUID, db: AsyncSession = Depends(get_db),
                           current_user: User = Depends(get_current_user)):
-    """Delete a teaching."""
     teaching = await db.get(Teaching, teaching_id)
     if not teaching or teaching.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Teaching not found")

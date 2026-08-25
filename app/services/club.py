@@ -4,9 +4,10 @@ from fastapi import HTTPException
 from app.models.club import Club, ClubMembership
 from app.models.enums import ClubRole
 from app.schemas.club import ClubCreate
+import uuid
 
 
-async def create_club(db: AsyncSession, user_id: int, club_in: ClubCreate) -> Club:
+async def create_club(db: AsyncSession, user_id: uuid.UUID, club_in: ClubCreate) -> Club:
     # 1. Create the Club
     new_club = Club(
         name=club_in.name,
@@ -33,7 +34,7 @@ async def create_club(db: AsyncSession, user_id: int, club_in: ClubCreate) -> Cl
     return new_club
 
 
-async def join_club(db: AsyncSession, user_id: int, club_id: int) -> ClubMembership:
+async def join_club(db: AsyncSession, user_id: uuid.UUID, club_id: int) -> ClubMembership:
     # Check if club exists
     club = await db.get(Club, club_id)
     if not club:

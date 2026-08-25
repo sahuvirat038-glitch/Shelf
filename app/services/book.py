@@ -1,9 +1,10 @@
+import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from app.models.book import Book
 from app.schemas.book import BookCreate
 
-async def get_or_create_book(db: AsyncSession, book_in: BookCreate, user_id: int) -> Book:
+async def get_or_create_book(db: AsyncSession, book_in: BookCreate, user_id: uuid.UUID) -> Book:
     # Check for case-insensitive duplicate
     query = select(Book).where(
         func.lower(Book.title) == book_in.title.lower(),

@@ -2,8 +2,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 from app.models.comment import Comment
 from app.schemas.comment import CommentCreate
+import uuid
 
-async def create_comment(db: AsyncSession, user_id: int, club_id: int, comment_in: CommentCreate) -> Comment:
+async def create_comment(db: AsyncSession, user_id: uuid.UUID, club_id: int, comment_in: CommentCreate) -> Comment:
     new_comment = Comment(
         club_id=club_id,
         user_id=user_id,
